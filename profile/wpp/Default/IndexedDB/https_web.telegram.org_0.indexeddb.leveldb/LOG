@@ -1,0 +1,6 @@
+2021/06/21-17:21:04.876 4ae4 Creating DB c:\Temp\FakeAnalyzerVC\profile\wpp\Default\IndexedDB\https_web.telegram.org_0.indexeddb.leveldb since it was missing.
+2021/06/21-17:21:04.935 4ae4 Reusing MANIFEST c:\Temp\FakeAnalyzerVC\profile\wpp\Default\IndexedDB\https_web.telegram.org_0.indexeddb.leveldb/MANIFEST-000001
+2021/06/21-17:52:35.315 4758 Level-0 table #5: started
+2021/06/21-17:52:35.328 4758 Level-0 table #5: 23313 bytes OK
+2021/06/21-17:52:35.334 4758 Delete type=0 #3
+2021/06/21-17:52:35.337 4758 Manual compaction at level-0 from (begin) .. (end); will stop at (end)

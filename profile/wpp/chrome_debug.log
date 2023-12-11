@@ -1,0 +1,6 @@
+[27632:54712:0610/180421.528:ERROR:device_event_log_impl.cc(214)] [18:04:21.527] USB: usb_device_handle_win.cc:1048 Failed to read descriptor from node connection: A device attached to the system is not functioning. (0x1F)
+[27632:54712:0610/180421.528:ERROR:device_event_log_impl.cc(214)] [18:04:21.528] USB: usb_device_handle_win.cc:1048 Failed to read descriptor from node connection: A device attached to the system is not functioning. (0x1F)
+[27632:54712:0610/180421.587:ERROR:device_event_log_impl.cc(214)] [18:04:21.587] Bluetooth: bluetooth_adapter_winrt.cc:1205 Getting Radio failed. Chrome will be unable to change the power state by itself.
+[27632:54712:0610/180421.632:ERROR:device_event_log_impl.cc(214)] [18:04:21.632] Bluetooth: bluetooth_adapter_winrt.cc:1283 OnPoweredRadioAdded(), Number of Powered Radios: 1
+[27632:54712:0610/180421.634:ERROR:device_event_log_impl.cc(214)] [18:04:21.634] Bluetooth: bluetooth_adapter_winrt.cc:1298 OnPoweredRadiosEnumerated(), Number of Powered Radios: 1
+[27632:54712:0610/180516.736:WARNING:pref_notifier_impl.cc(41)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

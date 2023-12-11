@@ -1,0 +1,30 @@
+2022/06/03-19:40:20.433 b02c Reusing MANIFEST C:\Users\alvaro.d\source\TCC\FakeAnalyzer\profile\wpp\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2022/06/03-19:40:20.436 b02c Recovering log #982
+2022/06/03-19:40:20.459 b02c Reusing old log C:\Users\alvaro.d\source\TCC\FakeAnalyzer\profile\wpp\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000982.log 
+2022/06/03-19:40:50.980 cd10 Level-0 table #996: started
+2022/06/03-19:40:51.018 cd10 Level-0 table #996: 1141951 bytes OK
+2022/06/03-19:40:51.022 cd10 Delete type=0 #982
+2022/06/03-19:41:24.307 f654 Compacting 1@1 + 10@2 files
+2022/06/03-19:41:24.448 f654 Generated table #997@1: 35467 keys, 2229123 bytes
+2022/06/03-19:41:24.501 f654 Generated table #998@1: 1808 keys, 2147585 bytes
+2022/06/03-19:41:24.548 f654 Generated table #999@1: 2734 keys, 2150843 bytes
+2022/06/03-19:41:24.602 f654 Generated table #1000@1: 3016 keys, 2151574 bytes
+2022/06/03-19:41:24.720 f654 Generated table #1001@1: 27533 keys, 2257743 bytes
+2022/06/03-19:41:24.802 f654 Generated table #1002@1: 14606 keys, 2179451 bytes
+2022/06/03-19:41:24.883 f654 Generated table #1003@1: 42013 keys, 2173784 bytes
+2022/06/03-19:41:25.005 f654 Generated table #1004@1: 102286 keys, 2254047 bytes
+2022/06/03-19:41:25.128 f654 Generated table #1005@1: 102252 keys, 2252978 bytes
+2022/06/03-19:41:25.173 f654 Generated table #1006@1: 35167 keys, 778386 bytes
+2022/06/03-19:41:25.173 f654 Compacted 1@1 + 10@2 files => 20575514 bytes
+2022/06/03-19:41:25.174 f654 compacted to: files[ 0 0 10 0 0 0 0 ]
+2022/06/03-19:41:25.175 f654 Delete type=2 #984
+2022/06/03-19:41:25.175 f654 Delete type=2 #985
+2022/06/03-19:41:25.175 f654 Delete type=2 #986
+2022/06/03-19:41:25.175 f654 Delete type=2 #987
+2022/06/03-19:41:25.175 f654 Delete type=2 #988
+2022/06/03-19:41:25.176 f654 Delete type=2 #989
+2022/06/03-19:41:25.176 f654 Delete type=2 #990
+2022/06/03-19:41:25.176 f654 Delete type=2 #991
+2022/06/03-19:41:25.176 f654 Delete type=2 #992
+2022/06/03-19:41:25.176 f654 Delete type=2 #993
+2022/06/03-19:41:25.176 f654 Delete type=2 #996

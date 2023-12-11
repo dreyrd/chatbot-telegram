@@ -1,0 +1,6 @@
+2022/09/02-17:08:05.725 7470 Creating DB C:\Users\alvaro.d\source\TCC\FakeAnalyzer\src\profile\wpp\Default\IndexedDB\https_meet.google.com_0.indexeddb.leveldb since it was missing.
+2022/09/02-17:08:05.748 7470 Reusing MANIFEST C:\Users\alvaro.d\source\TCC\FakeAnalyzer\src\profile\wpp\Default\IndexedDB\https_meet.google.com_0.indexeddb.leveldb/MANIFEST-000001
+2022/09/02-17:08:41.678 2508 Level-0 table #5: started
+2022/09/02-17:08:41.690 2508 Level-0 table #5: 3522 bytes OK
+2022/09/02-17:08:41.698 2508 Delete type=0 #3
+2022/09/02-17:08:41.699 2508 Manual compaction at level-0 from (begin) .. (end); will stop at (end)
