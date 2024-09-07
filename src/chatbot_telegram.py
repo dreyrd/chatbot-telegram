@@ -59,9 +59,7 @@ Clique em uma da ações desejadas:
 /texto      - Analisar texto    🔤
 /link       - Analisar link     🔗
 /imagem     - Analisar imagem   ⛰
-    
-**FakeAnalyzer** 
-https://www.abc.com.br/"""
+"""
     
     
     bot.send_message(msg.chat.id, TEXTO_MENU)
