@@ -16,7 +16,7 @@ load_dotenv()
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_NAME = os.getenv("DB_NAME")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_PASSWORD = os.getenv("")
 
 
 class ChatBotBase:
@@ -77,6 +77,16 @@ class ChatBotBase:
         cursor = self.db_connection.cursor(prepared=True)
         sql = "INSERT INTO mensagem (tipo, md5, conteudo, verificado, fake) VALUES (?, ?, ?, ?, ?)"
         values = [tipo, md5, conteudo, 0, 0]
+        print('Caiu aqui no registro do bd')
+        cursor.execute(sql, values)
+        cursor.close()
+        self.db_connection.commit()
+
+    def registrarTeste(self):
+        print('Deu certo')
+        cursor = self.db_connection.cursor(prepared=True)
+        sql = "INSERT INTO teste (teste) VALUES (?)"
+        values = ['aaa']
         print('Caiu aqui no registro do bd')
         cursor.execute(sql, values)
         cursor.close()
