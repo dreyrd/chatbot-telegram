@@ -20,7 +20,7 @@ API_KEY = os.getenv("API_KEY")
 SERVER = os.getenv("SERVER")
 DATABASE = os.getenv("DATABASE")
 USER_NAME = os.getenv("USER_NAME")
-
+TEXTO_MENU = ''
 
 
 
@@ -118,13 +118,14 @@ def unhandled_message(msg):
 
 @bot.message_handler(commands=["texto"])
 def analisarTexto(msg):
-    markup = types.ForceReply(selective=False)
+    markup = types.ForceReply(selective=True)
     message_enviada = bot.send_message(msg.chat.id, "Qual é o texto a analisar?", reply_markup=markup)
     bot.register_for_reply(message_enviada, analisar_retorno)
 
 @bot.message_handler(commands=["link"])
 def analisarLink(msg):
-    bot.send_message(msg.chat.id, "Por favor, envie-me a mensagem para eu analizar")
+    markup = types.ForceReply(selective=True)
+    bot.send_message(msg.chat.id, "Por favor, envie-me a mensagem para eu analizar", reply_markup=markup)
 
     if msg.forward_from:
         bot.send_message(msg.chat.id, "Isso é uma mensagem encaminhada, a chance dela ser fake news é maior")
@@ -140,7 +141,7 @@ def requisitarImagem(msg):
     # conteudo = "Primeira mensagem"
     # telegram_bot.registrarConteudoParaAnalise(tipoMensagem, conteudo, md5)
 
-    markup = types.ForceReply(selective=False)
+    markup = types.ForceReply(selective=True)
     bot.send_message(msg.chat.id, "Por favor envie a foto que será analisada", reply_markup=markup)
 
     bot.register_next_step_handler(msg, analisarImagem)
@@ -149,30 +150,29 @@ def requisitarImagem(msg):
 def analisarImagem(msg):
 
     if msg.photo is not None:
-        # Obter o arquivo_id da imagem com a maior resolução
+        
         file_id = msg.photo[-1].file_id
 
-        # Obter informações do arquivo da imagem
         file_info = bot.get_file(file_id)
 
-        # Baixar o arquivo da imagem
         file_path = file_info.file_path
         downloaded_file = requests.get(f"https://api.telegram.org/file/bot{API_KEY}/{file_path}").content
+        
+        horario = str(datetime.datetime.now()).replace('-', '').replace(':', '').replace(' ', '')
 
-        # Definir o nome do arquivo da imagem (opcional)
-        file_name = f"imagem_{msg.date.timestamp()}.jpg"
+        file_name = f"{horario}.jpg"
 
-        # Diretório para salvar a imagem
-        diretorio_salvar = "./src/images"  # Substitua pelo caminho correto
 
-        # Salvar a imagem no diretório
+        diretorio_salvar = "./src/images" 
+
+
         with open(f"{diretorio_salvar}/{file_name}", 'wb') as new_file:
             new_file.write(downloaded_file)
 
         bot.send_message(msg.chat.id, "Imagem salva com sucesso!")
     else:
 
-        bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, por favor envie uma foto")
+        bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, por favor envie um arquivo válido")
 
 
 

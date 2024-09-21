@@ -27,17 +27,9 @@ class ChatBotBase:
         self.teste = "test"
 
     def conectar_banco_dados(self):
-        print("Caiu aqui BD")
         try:
-            print(DB_HOST)
-            print(DB_USER)
-            print(DB_NAME)
-            print(DB_PASSWORD)
-
             self.db_connection = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD,
-                                                         database=DB_NAME)
-            print('a')
-
+            database=DB_NAME)
         except mysql.connector.Error as error:
             if error.errno == errorcode.ER_BAD_DB_ERROR:
                 print("Database doesn't exist")
