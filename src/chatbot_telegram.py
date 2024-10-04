@@ -1,18 +1,13 @@
 import telebot
 from dotenv import load_dotenv
 from telebot import types
-import time
 import os
-import re
 import requests
-import json
-import mysql.connector
 from mysql.connector import errorcode
-import pyodbc
 import hashlib
 from chatbot_base import ChatBotBase
-import time
 import datetime
+from database import Database
 
 load_dotenv()
 
@@ -46,18 +41,20 @@ def start(msg):
     else:
         cumprimento = "Boa noite"
 
-    TEXTO_MENU = f"""{cumprimento}! 
+    # TEXTO_MENU = f"""{cumprimento}! 
 
-        Eu sou o **FakeAnalyzer** 🔍 
+    #     Eu sou o **FakeAnalyzer** 🔍 
 
-        Como bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.
+    #     Como bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.
 
-        Clique em uma da ações desejadas: 
+    #     Clique em uma da ações desejadas: 
 
-        /texto      - Analisar texto    🔤
-        /link       - Analisar link     🔗
-        /imagem     - Analisar imagem   ⛰
-        """
+    #     /texto      - Analisar texto    🔤
+    #     /link       - Analisar link     🔗
+    #     /imagem     - Analisar imagem   ⛰
+    #     """
+        
+    TEXTO_MENU = f"{cumprimento}!\nEu sou o **FakeAnalyzer** 🔍\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.\nClique em uma da ações desejadas:\n/texto      - Analisar texto    🔤\n/link       \nAnalisar link     🔗\n/imagem     - Analisar imagem   ⛰"
         
     bot.send_message(msg.chat.id, TEXTO_MENU)
     
@@ -114,25 +111,25 @@ def photo(msg):
 
 @bot.message_handler(content_types=["sticker", "pinned_message", "location"])
 def unhandled_message(msg):
-    bot.send_message(msg.chat.id, text="Desculpe, eu não consigo responder mensagens desse tipo ainda")
+    bot.send_message(msg, text="Desculpe, eu não consigo responder mensagens desse tipo ainda")
 
 @bot.message_handler(commands=["texto"])
 def analisarTexto(msg):
-    markup = types.ForceReply(selective=True)
-    message_enviada = bot.send_message(msg.chat.id, "Qual é o texto a analisar?", reply_markup=markup)
+    markup = types.ForceReply(selective=False)
+    message_enviada = bot.reply_to(msg, "Qual é o texto a analisar?", reply_markup=markup)
+    query = f"insert into mensagem(conteudo) values ({message_enviada});"
+    Database.executarQuery(query)
     bot.register_for_reply(message_enviada, analisar_retorno)
 
 @bot.message_handler(commands=["link"])
 def analisarLink(msg):
-    markup = types.ForceReply(selective=True)
-    bot.send_message(msg.chat.id, "Por favor, envie-me a mensagem para eu analizar", reply_markup=markup)
+    markup = types.ForceReply(selective=False)
+    bot.reply_to(msg, "Por favor, envie-me o link para eu analizar", reply_markup=markup)
 
     if msg.forward_from:
         bot.send_message(msg.chat.id, "Isso é uma mensagem encaminhada, a chance dela ser fake news é maior")
         bot.send_message(msg.chat.id, "Mesmo assim vou verificar pra você")
         bot.send_message(msg.chat.id, "Estou analisando sua mensagem. Um momento por favor")
-
-
 
 @bot.message_handler(commands=["imagem"])
 def requisitarImagem(msg):
@@ -141,8 +138,8 @@ def requisitarImagem(msg):
     # conteudo = "Primeira mensagem"
     # telegram_bot.registrarConteudoParaAnalise(tipoMensagem, conteudo, md5)
 
-    markup = types.ForceReply(selective=True)
-    bot.send_message(msg.chat.id, "Por favor envie a foto que será analisada", reply_markup=markup)
+    markup = types.ForceReply(selective=False)
+    bot.reply_to(msg.chat.id, "Por favor envie a foto que será analisada", reply_markup=markup)
 
     bot.register_next_step_handler(msg, analisarImagem)
 
@@ -197,8 +194,7 @@ def arr_is_empty(arr):
 def analisar_retorno(x):
     texto = x.text
     md5 = hashlib.md5(x.text.encode()).hexdigest()
-    verificacao = telegram_bot.verificarMensagem(1, texto, md5)
-
+    #verificacao = telegram_bot.verificarMensagem(1, texto, md5)
     # refazer lógica partindo do seguinte: 
     # 1 - texto está no nosso banco de dados? --> a mensagem nunca foi recebida?
     # 2 - texto foi verificado? --> fake / vdd + justificativa
