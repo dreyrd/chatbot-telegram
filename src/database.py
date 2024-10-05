@@ -5,7 +5,7 @@ class Database:
     SERVER = "localhost"
     DATABASE = "fakeanalyzer"
     USUARIO = "root"
-    SENHA = "Ou^4$eVpygC^t^HHwbYq"
+    SENHA = ""
     API_KEY = '5061441215:AAE5qnFUHG6vAOjThb2wjrDAoRWPSUiGP08'
     con = None
 
@@ -14,7 +14,7 @@ class Database:
         # Tenta conexao com o banco
         try:
             Database.con = mysql.connector.connect(
-                dbname=Database.DATABASE,
+                database=Database.DATABASE,
                 user=Database.USUARIO,
                 password=Database.SENHA,
                 host=Database.SERVER,

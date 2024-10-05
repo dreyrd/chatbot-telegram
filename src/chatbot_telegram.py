@@ -18,11 +18,15 @@ USER_NAME = os.getenv("USER_NAME")
 TEXTO_MENU = ''
 
 
-
+def criar_md5(parametro):
+    
+    hash = hashlib.md5()
+    hash.update(parametro.encode("utf-8"))
+    return hash.hexdigest()
+    
 
 class TelegramBot(ChatBotBase):
     def __init__(self):
-        print("caiu no ctor base")
         super().__init__()
         pass
 
@@ -54,7 +58,7 @@ def start(msg):
     #     /imagem     - Analisar imagem   ⛰
     #     """
         
-    TEXTO_MENU = f"{cumprimento}!\nEu sou o **FakeAnalyzer** 🔍\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.\nClique em uma da ações desejadas:\n/texto      - Analisar texto    🔤\n/link       \nAnalisar link     🔗\n/imagem     - Analisar imagem   ⛰"
+    TEXTO_MENU = f"{cumprimento}!\n\nEuu sou o **FakeAnalyzer** 🔍\n\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.\n\nClique em uma da ações desejadas:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t\n\nAnalisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
         
     bot.send_message(msg.chat.id, TEXTO_MENU)
     
@@ -65,10 +69,10 @@ def start(msg):
         link: https://sitemaneiro.com.br
         """
         
-    autorizacao = "Você autorizar pegarmos seu DDD para melhorar o desempenho do bot?"
-    
-    bot.send_message(msg.chat.id, site)
-    bot.send_message(msg.chat.id, autorizacao)
+        autorizacao = "Você autorizar pegarmos seu DDD para melhorar o desempenho do bot?"
+        
+        bot.send_message(msg.chat.id, site)
+        bot.send_message(msg.chat.id, autorizacao)
         
 @bot.message_handler(commands=['start'])
 def autorizar(msg):
@@ -111,15 +115,13 @@ def photo(msg):
 
 @bot.message_handler(content_types=["sticker", "pinned_message", "location"])
 def unhandled_message(msg):
-    bot.send_message(msg, text="Desculpe, eu não consigo responder mensagens desse tipo ainda")
+    bot.send_message(msg, "Desculpe, eu não consigo responder mensagens desse tipo ainda")
 
 @bot.message_handler(commands=["texto"])
 def analisarTexto(msg):
     markup = types.ForceReply(selective=False)
-    message_enviada = bot.reply_to(msg, "Qual é o texto a analisar?", reply_markup=markup)
-    query = f"insert into mensagem(conteudo) values ({message_enviada});"
-    Database.executarQuery(query)
-    bot.register_for_reply(message_enviada, analisar_retorno)
+    bot.reply_to(msg, "Qual é o texto a analisar?", reply_markup=markup)
+    bot.register_next_step_handler(msg, analisar_retorno)
 
 @bot.message_handler(commands=["link"])
 def analisarLink(msg):
@@ -139,7 +141,7 @@ def requisitarImagem(msg):
     # telegram_bot.registrarConteudoParaAnalise(tipoMensagem, conteudo, md5)
 
     markup = types.ForceReply(selective=False)
-    bot.reply_to(msg.chat.id, "Por favor envie a foto que será analisada", reply_markup=markup)
+    bot.reply_to(msg, "Por favor envie a foto que será analisada", reply_markup=markup)
 
     bot.register_next_step_handler(msg, analisarImagem)
 
@@ -165,6 +167,13 @@ def analisarImagem(msg):
 
         with open(f"{diretorio_salvar}/{file_name}", 'wb') as new_file:
             new_file.write(downloaded_file)
+            
+            md5 = criar_md5(file_name)
+            
+            query = f"insert into mensagem(md5, tipo, conteudo, verificado, fake, justificativa) values ('{md5}', 3, '{diretorio_salvar}/{file_name}', 0, 0, 'teste')"
+            Database.executarQuery(query)
+            
+            
 
         bot.send_message(msg.chat.id, "Imagem salva com sucesso!")
     else:
@@ -185,15 +194,31 @@ def query_text(inline_query):
 
 
 def arr_is_empty(arr):
-    for (element) in arr:
-        if (element == True):
+    for element in arr:
+        if element:
             return False
     return True
 
 
-def analisar_retorno(x):
-    texto = x.text
-    md5 = hashlib.md5(x.text.encode()).hexdigest()
+def analisar_retorno(msg):
+    texto = msg.text
+    md5Atual = criar_md5(texto)
+    query = f"SELECT * FROM mensagem WHERE conteudo = '{msg.text}'"
+    resultado = Database.executarSelect(query)
+    
+    if not arr_is_empty(resultado):
+        md5 = resultado[0][0]
+        tipo = resultado[0][1]
+        conteudo = resultado[0][2]
+        verificado = resultado[0][3]
+        fake = resultado[0][4]
+        justificativa = resultado[0][5]
+    else:
+        query = f"INSERT INTO mensagem(md5, tipo, conteudo) VALUES ('{md5Atual}', 1, '{msg.text}')"
+        Database.executarQuery(query)
+    
+    
+
     #verificacao = telegram_bot.verificarMensagem(1, texto, md5)
     # refazer lógica partindo do seguinte: 
     # 1 - texto está no nosso banco de dados? --> a mensagem nunca foi recebida?
@@ -201,53 +226,55 @@ def analisar_retorno(x):
     
     
     # 1 - array falso: nao achou no banco
-    if (arr_is_empty(verificacao) == True):
-        print('nao tem no bd')
-    else:
-        print('tem no bd')
+    #if (arr_is_empty(verificacao) == True):
+    #    print('nao tem no bd')
+    #else:
+    #    print('tem no bd')
         # texto foi verificado?
         # texto ja foi dito fake?
     
 
-    if (verificacao[3] and verificacao[2]):
-        bot.send_message(x.chat.id, "Essa mensagem é falsa")
-        bot.send_message(x.chat.id, "Conteudo verificado")
-        bot.send_message(x.chat.id, "Justificativa: " + verificacao[3])
-    else:
-        bot.send_message(x.chat.id, "Essa mensagem é verificada")
-    pass
+    #if (verificacao[3] and verificacao[2]):
+    #    bot.send_message(x.chat.id, "Essa mensagem é falsa")
+    #    bot.send_message(x.chat.id, "Conteudo verificado")
+    #    bot.send_message(x.chat.id, "Justificativa: " + verificacao[3])
+    #else:
+    #    bot.send_message(x.chat.id, "Essa mensagem é verificada")
+    #pass
 
 
-def verificar(msg):
-    if isForwardMessage(msg):
-        print(msg.forward_from.first_name)
-    else:
-        if isNotAPreDefinedMessage(msg):
-            # print(msg)
-            pass
-    return True
+
+
+
+
+
+
+
+
+
+
+
+
+# def verificar(msg):
+#     if isForwardMessage(msg):
+#         print(msg.forward_from.first_name)
+#     else:
+#         if isNotAPreDefinedMessage(msg):
+#             # print(msg)
+#             pass
+#     return True
 
 
 # verica se a msg é forward ou não
-def isForwardMessage(msg):
-    return True if msg.forward_from else False
+# def isForwardMessage(msg):
+#     return True if msg.forward_from else False
 
 
-def isNotAPreDefinedMessage(msg):
-    if (msg.text != ["acao1", "acao2", "acao3", "acao4"]):
-        return True
-    else:
-        return False
-
-
-@bot.message_handler(commands=['oi'])
-def responder(msg):
-    bot.reply_to(msg, TEXTO_MENU)
-
-
-@bot.message_handler(commands=['exemplo'])
-def enviar_msg(msg):
-    bot.reply_to(msg, "Olá, tudo bem?")
+# def isNotAPreDefinedMessage(msg):
+#     if (msg.text != ["acao1", "acao2", "acao3", "acao4"]):
+#         return True
+#     else:
+#         return False
 
 
 bot.polling()

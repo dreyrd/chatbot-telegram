@@ -21,7 +21,6 @@ DB_PASSWORD = os.getenv("")
 
 class ChatBotBase:
     def __init__(self):
-        print("caiu no ctor base")
         self.db_connection = None
         self.conectar_banco_dados()
         self.teste = "test"
