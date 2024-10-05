@@ -203,7 +203,7 @@ def arr_is_empty(arr):
 def analisar_retorno(msg):
     texto = msg.text
     md5Atual = criar_md5(texto)
-    query = f"SELECT * FROM mensagem WHERE conteudo = '{msg.text}'"
+    query = f"SELECT * FROM mensagem WHERE md5 = '{md5Atual}'"
     resultado = Database.executarSelect(query)
     
     if not arr_is_empty(resultado):
