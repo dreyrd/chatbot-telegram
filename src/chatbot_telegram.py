@@ -8,6 +8,9 @@ import hashlib
 from chatbot_base import ChatBotBase
 import datetime
 from database import Database
+import requests
+from bs4 import BeautifulSoup
+
 
 load_dotenv()
 
@@ -17,12 +20,33 @@ DATABASE = os.getenv("DATABASE")
 USER_NAME = os.getenv("USER_NAME")
 TEXTO_MENU = ''
 
-
 def criar_md5(parametro):
     
     hash = hashlib.md5()
     hash.update(parametro.encode("utf-8"))
     return hash.hexdigest()
+
+def pegar_titulo(url):
+    
+    try:
+    
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            
+            titulo = soup.find('h1').get_text()
+            
+            # print(titulo)
+            
+            return titulo
+
+    except:
+        
+        return 'Não foi possível acessar o link'
+    
     
 
 class TelegramBot(ChatBotBase):
@@ -58,7 +82,7 @@ def start(msg):
     #     /imagem     - Analisar imagem   ⛰
     #     """
         
-    TEXTO_MENU = f"{cumprimento}!\n\nEuu sou o **FakeAnalyzer** 🔍\n\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.\n\nClique em uma da ações desejadas:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t\n\nAnalisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
+    TEXTO_MENU = f"{cumprimento}!\n\nEu sou o **FakeAnalyzer** 🔍\n\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é identificar notícias falsas (fake news) difundidas nas redes sociais, analisando os diversos tipos de conteúdos como textos, links e imagens.\n\nClique em uma da ações desejadas:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t- Analisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
         
     bot.send_message(msg.chat.id, TEXTO_MENU)
     
@@ -100,6 +124,8 @@ def phone(msg):
 #     bot.send_message(msg.chat.id, 'Anrtes')
 #     telegram_bot.registrarTeste()
 
+#   //*[@id="post-1739851"]/h1
+
 @bot.message_handler(content_types=['contact'])
 def contact(msg):
     if msg.contact is not None:
@@ -132,6 +158,20 @@ def analisarLink(msg):
         bot.send_message(msg.chat.id, "Isso é uma mensagem encaminhada, a chance dela ser fake news é maior")
         bot.send_message(msg.chat.id, "Mesmo assim vou verificar pra você")
         bot.send_message(msg.chat.id, "Estou analisando sua mensagem. Um momento por favor")
+        
+    else:
+        bot.register_next_step_handler(msg, analisar_link)
+        
+
+def analisar_link(msg):
+    
+    titulo = pegar_titulo(msg.text)
+    
+    bot.send_message(msg.chat.id, titulo)
+
+
+
+
 
 @bot.message_handler(commands=["imagem"])
 def requisitarImagem(msg):
@@ -173,9 +213,9 @@ def analisarImagem(msg):
             query = f"insert into mensagem(md5, tipo, conteudo, verificado, fake, justificativa) values ('{md5}', 3, '{diretorio_salvar}/{file_name}', 0, 0, 'teste')"
             Database.executarQuery(query)
             
-            
 
-        bot.send_message(msg.chat.id, "Imagem salva com sucesso!")
+        bot.send_message(msg.chat.id, "Essa imagem é gerada por IA!!!")
+
     else:
 
         bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, por favor envie um arquivo válido")
