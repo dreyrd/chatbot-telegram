@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 
 load_dotenv()
 
-API_KEY = os.getenv("API_KEY")
+API_KEY = '7231801744:AAHPa6UHgZxhGsJuoBhLK5U35xszS0aY3jc'
 SERVER = os.getenv("SERVER")
 DATABASE = os.getenv("DATABASE")
 USER_NAME = os.getenv("USER_NAME")
@@ -38,8 +38,6 @@ def pegar_titulo(url):
             
             
             titulo = soup.find('h1').get_text()
-            
-            # print(titulo)
             
             return titulo
 

@@ -6,7 +6,7 @@ class Database:
     DATABASE = "fakeanalyzer"
     USUARIO = "root"
     SENHA = ""
-    API_KEY = '5061441215:AAE5qnFUHG6vAOjThb2wjrDAoRWPSUiGP08'
+    API_KEY = '7231801744:AAHPa6UHgZxhGsJuoBhLK5U35xszS0aY3jc'
     con = None
 
     @staticmethod
