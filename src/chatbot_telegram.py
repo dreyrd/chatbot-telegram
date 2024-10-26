@@ -43,7 +43,7 @@ def pegar_titulo(url):
 
     except:
         
-        return 'Não foi possível acessar o link'
+        return 'Não foi possível acessar o link. Vamos tentar de novo?'
     
     
 
@@ -57,41 +57,28 @@ telegram_bot = TelegramBot()
 
 @bot.message_handler(commands=['start', 'help'])
 def start(msg):
-    cumprimento = None
+    cumprimento = "Olá! "
     horario = datetime.datetime.now().hour
     
     if 5 <= horario < 12:
-        cumprimento = "Bom dia"
+        cumprimento += "Bom dia"
     elif 12 <= horario < 18:
-        cumprimento = "Boa tarde"
+        cumprimento += "Boa tarde"
     else:
-        cumprimento = "Boa noite"
-
-    # TEXTO_MENU = f"""{cumprimento}! 
-
-    #     Eu sou o **FakeAnalyzer** 🔍 
-
-    #     Como bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é lorem ipsum dolor sit amet consectetur adiscipiscing it.
-
-    #     Clique em uma da ações desejadas: 
-
-    #     /texto      - Analisar texto    🔤
-    #     /link       - Analisar link     🔗
-    #     /imagem     - Analisar imagem   ⛰
-    #     """
+        cumprimento += "Boa noite"
         
-    TEXTO_MENU = f"{cumprimento}!\n\nEu sou o **FakeAnalyzer** 🔍\n\nComo bot do IFSP-HTO, sou um verificador de **fake news**! Meu papel é identificar notícias falsas (fake news) difundidas nas redes sociais, analisando os diversos tipos de conteúdos como textos, links e imagens.\n\nClique em uma da ações desejadas:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t- Analisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
+    TEXTO_MENU = f"{cumprimento}!\n\nMeu nome é <b>FakeAnalyzer</b>! 🔍\n\Sou um chatbot do IFSP HTO. Meu papel é <b>identificar notícias falsas</b> difundidas pelas redes sociais e pela internet, analisando e respondendo suas mensagens na forma de textos, links e imagens.\n\nDigite ou clique no comando abaixo para investigarmos:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t- Analisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
         
-    bot.send_message(msg.chat.id, TEXTO_MENU)
+    bot.send_message(msg.chat.id, TEXTO_MENU, parse_mode='HTML')
     
     if "/start" in msg.text:
         site = """
-        Nosso bot também possui um site para análise de notícias falsas e mais informações sobre o projeto
+        Para mais informações sobre o projeto agente na prevenção das fakenews, confira o site:
         
-        link: https://sitemaneiro.com.br
+        https://sitemaneiro.com.br
         """
         
-        autorizacao = "Você autorizar pegarmos seu DDD para melhorar o desempenho do bot?"
+        autorizacao = "Antes de começarmos, você autoriza coletarmos seu DDD para melhorar o desempenho do bot?"
         
         bot.send_message(msg.chat.id, site)
         bot.send_message(msg.chat.id, autorizacao)
@@ -100,12 +87,12 @@ def start(msg):
 def autorizar(msg):
     
     site = """
-    Nosso bot também possui um site para análise de notícias falsas e mais informações sobre o projeto
-    
-    link: https://sitemaneiro.com.br
+    Para mais informações sobre o projeto agente na prevenção das fakenews, confira o site:
+        
+    https://sitemaneiro.com.br
     """
     
-    autorizacao = "Você autoriza pegarmos seu DDD para melhorar o desempenho do bot?"
+    autorizacao = "Antes de começarmos, você autoriza coletarmos seu DDD para melhorar o desempenho do bot?"
     
     bot.send_message(msg.chat.id, site)
     bot.send_message(msg.chat.id, autorizacao)
@@ -139,23 +126,23 @@ def photo(msg):
 
 @bot.message_handler(content_types=["sticker", "pinned_message", "location"])
 def unhandled_message(msg):
-    bot.send_message(msg, "Desculpe, eu não consigo responder mensagens desse tipo ainda")
+    bot.send_message(msg, "Desculpe, eu ainda não consigo responder a mensagens desse formato.")
 
 @bot.message_handler(commands=["texto"])
 def analisarTexto(msg):
     markup = types.ForceReply(selective=False)
-    bot.reply_to(msg, "Qual é o texto a analisar?", reply_markup=markup)
+    bot.reply_to(msg, "Qual é o texto a ser analisado?", reply_markup=markup)
     bot.register_next_step_handler(msg, analisar_retorno)
 
 @bot.message_handler(commands=["link"])
 def analisarLink(msg):
     markup = types.ForceReply(selective=False)
-    bot.reply_to(msg, "Por favor, envie-me o link para eu analizar", reply_markup=markup)
+    bot.reply_to(msg, "Qual é o link a ser analisado?", reply_markup=markup)
 
     if msg.forward_from:
-        bot.send_message(msg.chat.id, "Isso é uma mensagem encaminhada, a chance dela ser fake news é maior")
-        bot.send_message(msg.chat.id, "Mesmo assim vou verificar pra você")
-        bot.send_message(msg.chat.id, "Estou analisando sua mensagem. Um momento por favor")
+        bot.send_message(msg.chat.id, "A mensagem, por ser encaminhada, possui chances maiores de ser falsa.")
+        bot.send_message(msg.chat.id, "Só um minuto, farei uma verificação.")
+        bot.send_message(msg.chat.id, "Analisando sua mensagem...")
         
     else:
         bot.register_next_step_handler(msg, analisar_link)
@@ -179,7 +166,7 @@ def requisitarImagem(msg):
     # telegram_bot.registrarConteudoParaAnalise(tipoMensagem, conteudo, md5)
 
     markup = types.ForceReply(selective=False)
-    bot.reply_to(msg, "Por favor envie a foto que será analisada", reply_markup=markup)
+    bot.reply_to(msg, "Qual é a foto a ser analisado?", reply_markup=markup)
 
     bot.register_next_step_handler(msg, analisarImagem)
 
@@ -212,11 +199,11 @@ def analisarImagem(msg):
             Database.executarQuery(query)
             
 
-        bot.send_message(msg.chat.id, "Essa imagem é gerada por IA!!!")
+        bot.send_message(msg.chat.id, "Essa imagem é gerada por IA! Seus elementos foram alterados e, por isso, não deve ser confiável.")
 
     else:
 
-        bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, por favor envie um arquivo válido")
+        bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, envie um arquivo válido por favor.")
 
 
 
