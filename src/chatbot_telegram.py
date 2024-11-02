@@ -37,7 +37,7 @@ def pegar_titulo(url):
             soup = BeautifulSoup(response.content, 'html.parser')
             
             
-            titulo = soup.find('h1').get_text()
+            titulo = soup.find('title').get_text()
             
             return titulo
 
@@ -67,7 +67,7 @@ def start(msg):
     else:
         cumprimento += "Boa noite"
         
-    TEXTO_MENU = f"{cumprimento}!\n\nMeu nome é <b>FakeAnalyzer</b>! 🔍\n\Sou um chatbot do IFSP HTO. Meu papel é <b>identificar notícias falsas</b> difundidas pelas redes sociais e pela internet, analisando e respondendo suas mensagens na forma de textos, links e imagens.\n\nDigite ou clique no comando abaixo para investigarmos:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t- Analisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
+    TEXTO_MENU = f"{cumprimento}!\n\nMeu nome é <b>FakeAnalyzer</b>! 🔍\nSou um chatbot do IFSP HTO. Meu papel é <b>identificar notícias falsas</b> difundidas pelas redes sociais e pela internet, analisando e respondendo suas mensagens na forma de textos, links e imagens.\n\nDigite ou clique no comando abaixo para investigarmos:\n\n/texto\t\t- Analisar texto\t\t🔤\n\n/link\t\t- Analisar link\t\t🔗\n\n/imagem\t\t- Analisar imagem\t\t⛰"
         
     bot.send_message(msg.chat.id, TEXTO_MENU, parse_mode='HTML')
     
@@ -132,7 +132,7 @@ def unhandled_message(msg):
 def analisarTexto(msg):
     markup = types.ForceReply(selective=False)
     bot.reply_to(msg, "Qual é o texto a ser analisado?", reply_markup=markup)
-    bot.register_next_step_handler(msg, analisar_retorno)
+    bot.register_next_step_handler(msg, analisar_retorno_texto)
 
 @bot.message_handler(commands=["link"])
 def analisarLink(msg):
@@ -145,18 +145,8 @@ def analisarLink(msg):
         bot.send_message(msg.chat.id, "Analisando sua mensagem...")
         
     else:
-        bot.register_next_step_handler(msg, analisar_link)
+        bot.register_next_step_handler(msg, analisar_retorno_link)
         
-
-def analisar_link(msg):
-    
-    titulo = pegar_titulo(msg.text)
-    
-    bot.send_message(msg.chat.id, titulo)
-
-
-
-
 
 @bot.message_handler(commands=["imagem"])
 def requisitarImagem(msg):
@@ -225,81 +215,65 @@ def arr_is_empty(arr):
     return True
 
 
-def analisar_retorno(msg):
+def analisar_retorno_texto(msg):
     texto = msg.text
     md5Atual = criar_md5(texto)
     query = f"SELECT * FROM mensagem WHERE md5 = '{md5Atual}'"
     resultado = Database.executarSelect(query)
     
     if not arr_is_empty(resultado):
-        md5 = resultado[0][0]
-        tipo = resultado[0][1]
-        conteudo = resultado[0][2]
         verificado = resultado[0][3]
         fake = resultado[0][4]
         justificativa = resultado[0][5]
+
+        if(verificado):
+            if(fake):
+                bot.send_message(msg.chat.id, 
+                                f"<b>O conteúdo informado é <b>FALSO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação não confiáve.\n\n<b>Justificativa:</b> {justificativa}", 
+                                parse_mode='HTML')
+            else:
+                bot.send_message(msg.chat.id, 
+                                f"<b>O conteúdo informado é <b>VERDADEIRO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação confiável.\n\n<b>Justificativa:</b> {justificativa}",
+                                parse_mode='HTML')
+        else:
+            
+            bot.send_message(msg.chat.id, "Essa mensagem já foi registrada no nosso banco, porém não foi analisada ainda")
+        
     else:
         query = f"INSERT INTO mensagem(md5, tipo, conteudo) VALUES ('{md5Atual}', 1, '{msg.text}')"
         Database.executarQuery(query)
+        bot.send_message(msg.chat.id, "É a primeira vez que recebemos essa mensagem. Acabamos enviá-la aos nossos especialistas, que verificarão a veracidade dessa notícia.\nPor favor, peço que verifique novamente mais tarde.")
+
+
+
+def analisar_retorno_link(msg):
+    texto = pegar_titulo(msg.text)
+    md5Atual = criar_md5(texto)
+    query = f"SELECT * FROM mensagem WHERE md5 = '{md5Atual}'"
+    resultado = Database.executarSelect(query)
     
+    if not arr_is_empty(resultado):
+        verificado = resultado[0][3]
+        fake = resultado[0][4]
+        justificativa = resultado[0][5]
+
+        if(verificado):
+            if(fake):
+                bot.send_message(msg.chat.id, 
+                                f"<b>O conteúdo informado é <b>FALSO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação não confiáve.\n\n<b>Justificativa:</b> {justificativa}", 
+                                parse_mode='HTML')
+            else:
+                bot.send_message(msg.chat.id, 
+                                f"<b>O conteúdo informado é <b>VERDADEIRO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação confiável.\n\n<b>Justificativa:</b> {justificativa}",
+                                parse_mode='HTML')
+        else:
+            
+            bot.send_message(msg.chat.id, "Essa mensagem já foi registrada no nosso banco, porém não foi analisada ainda")
+        
+    else:
+        query = f"INSERT INTO mensagem(md5, tipo, conteudo) VALUES ('{md5Atual}', 2, '{msg.text}')"
+        Database.executarQuery(query)
+        bot.send_message(msg.chat.id, "É a primeira vez que recebemos essa mensagem. Acabamos enviá-la aos nossos especialistas, que verificarão a veracidade dessa notícia.\nPor favor, peço que verifique novamente mais tarde.")
     
-
-    #verificacao = telegram_bot.verificarMensagem(1, texto, md5)
-    # refazer lógica partindo do seguinte: 
-    # 1 - texto está no nosso banco de dados? --> a mensagem nunca foi recebida?
-    # 2 - texto foi verificado? --> fake / vdd + justificativa
-    
-    
-    # 1 - array falso: nao achou no banco
-    #if (arr_is_empty(verificacao) == True):
-    #    print('nao tem no bd')
-    #else:
-    #    print('tem no bd')
-        # texto foi verificado?
-        # texto ja foi dito fake?
-    
-
-    #if (verificacao[3] and verificacao[2]):
-    #    bot.send_message(x.chat.id, "Essa mensagem é falsa")
-    #    bot.send_message(x.chat.id, "Conteudo verificado")
-    #    bot.send_message(x.chat.id, "Justificativa: " + verificacao[3])
-    #else:
-    #    bot.send_message(x.chat.id, "Essa mensagem é verificada")
-    #pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def verificar(msg):
-#     if isForwardMessage(msg):
-#         print(msg.forward_from.first_name)
-#     else:
-#         if isNotAPreDefinedMessage(msg):
-#             # print(msg)
-#             pass
-#     return True
-
-
-# verica se a msg é forward ou não
-# def isForwardMessage(msg):
-#     return True if msg.forward_from else False
-
-
-# def isNotAPreDefinedMessage(msg):
-#     if (msg.text != ["acao1", "acao2", "acao3", "acao4"]):
-#         return True
-#     else:
-#         return False
-
 
 bot.polling()
