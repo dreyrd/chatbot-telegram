@@ -121,7 +121,7 @@ def photo(msg):
     if msg.photo is not None:
         print(msg.photo)
         # verificar se tem a img no bd
-
+ 
         # caso n tenha, salvar no bd
 
 @bot.message_handler(content_types=["sticker", "pinned_message", "location"])
@@ -164,33 +164,34 @@ def requisitarImagem(msg):
 def analisarImagem(msg):
 
     if msg.photo is not None:
-        
-        file_id = msg.photo[-1].file_id
+        if msg.content_type == 'photo':
+            file_id = msg.photo[-1].file_id
 
-        file_info = bot.get_file(file_id)
+            file_info = bot.get_file(file_id)
 
-        file_path = file_info.file_path
-        downloaded_file = requests.get(f"https://api.telegram.org/file/bot{API_KEY}/{file_path}").content
-        
-        horario = str(datetime.datetime.now()).replace('-', '').replace(':', '').replace(' ', '')
-
-        file_name = f"{horario}.jpg"
-
-
-        diretorio_salvar = "./src/images" 
-
-
-        with open(f"{diretorio_salvar}/{file_name}", 'wb') as new_file:
-            new_file.write(downloaded_file)
+            file_path = file_info.file_path
+            downloaded_file = requests.get(f"https://api.telegram.org/file/bot{API_KEY}/{file_path}").content
             
-            md5 = criar_md5(file_name)
-            
-            query = f"insert into mensagem(md5, tipo, conteudo, verificado, fake, justificativa) values ('{md5}', 3, '{diretorio_salvar}/{file_name}', 0, 0, 'teste')"
-            Database.executarQuery(query)
-            
+            horario = str(datetime.datetime.now()).replace('-', '').replace(':', '').replace(' ', '')
 
-        bot.send_message(msg.chat.id, "Essa imagem é gerada por IA! Seus elementos foram alterados e, por isso, não deve ser confiável.")
+            file_name = f"{horario}.jpg"
 
+
+            diretorio_salvar = "./src/images" 
+
+
+            with open(f"{diretorio_salvar}/{file_name}", 'wb') as new_file:
+                new_file.write(downloaded_file)
+                
+                md5 = criar_md5(file_name)
+                
+                query = f"insert into mensagem(md5, tipo, conteudo, verificado, fake, justificativa) values ('{md5}', 3, '{diretorio_salvar}/{file_name}', 0, 0, 'teste')"
+                Database.executarQuery(query)
+                
+
+            bot.send_message(msg.chat.id, "Essa imagem é gerada por IA! Seus elementos foram alterados e, por isso, não deve ser confiável.")
+        else:
+            bot.reply_to(msg, "Conteúdo não reconhecido como imagem.")
     else:
 
         bot.send_message(msg.chat.id, "Não consegui compreender a mensagem enviada, envie um arquivo válido por favor.")
@@ -220,30 +221,31 @@ def analisar_retorno_texto(msg):
     md5Atual = criar_md5(texto)
     query = f"SELECT * FROM mensagem WHERE md5 = '{md5Atual}'"
     resultado = Database.executarSelect(query)
-    
-    if not arr_is_empty(resultado):
-        verificado = resultado[0][3]
-        fake = resultado[0][4]
-        justificativa = resultado[0][5]
+    if msg.content_type == 'text':
+        if not arr_is_empty(resultado):
+            verificado = resultado[0][3]
+            fake = resultado[0][4]
+            justificativa = resultado[0][5]
 
-        if(verificado):
-            if(fake):
-                bot.send_message(msg.chat.id, 
-                                f"<b>O conteúdo informado é <b>FALSO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação não confiáve.\n\n<b>Justificativa:</b> {justificativa}", 
-                                parse_mode='HTML')
+            if(verificado):
+                if(fake):
+                    bot.send_message(msg.chat.id, 
+                                    f"<b>O conteúdo informado é <b>FALSO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação não confiáve.\n\n<b>Justificativa:</b> {justificativa}", 
+                                    parse_mode='HTML')
+                else:
+                    bot.send_message(msg.chat.id, 
+                                    f"<b>O conteúdo informado é <b>VERDADEIRO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação confiável.\n\n<b>Justificativa:</b> {justificativa}",
+                                    parse_mode='HTML')
             else:
-                bot.send_message(msg.chat.id, 
-                                f"<b>O conteúdo informado é <b>VERDADEIRO!</b></b>\n\nUma análise já foi feita pelos especialistas do FakeAnalyzer e pode-se afirmar que se trata de uma informação confiável.\n\n<b>Justificativa:</b> {justificativa}",
-                                parse_mode='HTML')
-        else:
+                
+                bot.send_message(msg.chat.id, "Essa mensagem já foi registrada no nosso banco, porém não foi analisada ainda")
             
-            bot.send_message(msg.chat.id, "Essa mensagem já foi registrada no nosso banco, porém não foi analisada ainda")
-        
+        else:
+            query = f"INSERT INTO mensagem(md5, tipo, conteudo) VALUES ('{md5Atual}', 1, '{msg.text}')"
+            Database.executarQuery(query)
+            bot.send_message(msg.chat.id, "É a primeira vez que recebemos essa mensagem. Acabamos enviá-la aos nossos especialistas, que verificarão a veracidade dessa notícia.\nPor favor, peço que verifique novamente mais tarde.")
     else:
-        query = f"INSERT INTO mensagem(md5, tipo, conteudo) VALUES ('{md5Atual}', 1, '{msg.text}')"
-        Database.executarQuery(query)
-        bot.send_message(msg.chat.id, "É a primeira vez que recebemos essa mensagem. Acabamos enviá-la aos nossos especialistas, que verificarão a veracidade dessa notícia.\nPor favor, peço que verifique novamente mais tarde.")
-
+        bot.reply_to(msg, "Conteúdo não reconhecido como texto.")
 
 
 def analisar_retorno_link(msg):
